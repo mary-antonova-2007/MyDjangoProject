@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Проверка номеров комнат на репетицию</h1>
+<form action="{% url 'rehearsal_rooms' %}" method="post">
+    <!-- Django CSRF токен для обработки формы -->
+    {% csrf_token %}
+    <div>
+        <label for="date">Дата (дд-мм-гг):</label>
+        <input type="text" id="date" name="date" required pattern="\d{2}-\d{2}-\d{2}">
+    </div>
+    <div>
+        <label for="data">Данные о комнатах (JSON формат):</label>
+        <textarea id="data" name="data" required placeholder='{"count": 4, "rooms": [1, 2, 3, 4]}'></textarea>
+    </div>
+    <button type="submit">Отправить данные</button>
+</form>
+{% endblock %}
