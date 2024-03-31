@@ -1,31 +1,12 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<a href="{% url 'rehearsal_info' day=25 month=1 year=2023 %}">Информация за 25 января 2023 года</a>
-<h1>Информация о репетициях</h1>
-<div>
-    <button onclick="window.location.href='{% url 'available_dates' %}'">Доступные даты</button>
-    <button onclick="window.location.href='{% url 'data_by_date' 25 01 23 %}'">Информация за определённую дату</button>
-    <button onclick="window.location.href='{% url 'rehearsal_rooms' %}'">Проверка номеров комнат</button>
-    <!-- Добавьте другие кнопки сюда -->
-</div>
-<!-- Форма для ввода даты пользователем -->
-<div>
-    <h2>Получить информацию за дату</h2>
-    <form action="{% url 'rehearsal_info' 2023 1 25 %}" method="get">
-        <input type="number" name="day" placeholder="День" required>
-        <input type="number" name="month" placeholder="Месяц" required>
-        <input type="number" name="year" placeholder="Год" required>
-        <button type="submit">Получить информацию</button>
-    </form>
-</div>
-<div>
-    <h2>Ввести информацию о репетициях</h2>
-    <form action="{% url 'main' %}" method="post">
-        {% csrf_token %}
-        <input type="number" name="rooms_count" placeholder="Количество комнат на этаже" required>
-        <input type="text" name="windows_per_room" placeholder="Окна на этаже (напр., 3,2,1)" required>
-        <input type="text" name="light_data" placeholder="Свет в окнах (напр., true,false,true)" required>
-        <button type="submit">Отправить информацию</button>
-    </form>
+<div class="container">
+    <h2>Доступные даты для информации о репетициях</h2>
+    {% for date in dates %}
+        <button onclick="location.href='{% url 'rehearsal_info' date.day date.month date.year %}'">
+            {{ date.date_str }} - Информация о репетициях
+        </button>
+    {% endfor %}
 </div>
 {% endblock %}

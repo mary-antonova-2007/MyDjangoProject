@@ -33,6 +33,7 @@ def parse_room_info(data):
 
 def available_dates(request):
     dates = get_available_dates(auth_token)
+    print(dates)
     if dates:
         return JsonResponse({'dates': dates})
     else:
