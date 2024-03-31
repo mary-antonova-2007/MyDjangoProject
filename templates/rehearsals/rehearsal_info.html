@@ -1,0 +1,46 @@
+{% block style %}\
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    table, th, td {
+        border: 1px solid black;
+    }
+    th {
+        background-color: gray;
+        color: white;
+    }
+    td.light-on {
+        background-color: yellow;
+    }
+    .header {
+        background-color: #D3D3D3;
+    }
+</style>
+{% endblock %}
+
+{% block contetnt %}
+<h2>{{ date.description }}: {{ date.data|date:"d.m.Y" }}</h2>
+<table>
+    <tr class="header">
+        <th colspan="6">Количество комнат на этаже: {{ rooms_count.data }}</th>
+    </tr>
+    <tr class="header">
+        <td colspan="6">Окна на этаже: {{ windows_for_room.data.0 }} {{ windows_for_room.data.1 }} {{ windows_for_room.data.2 }}</td>
+    </tr>
+    {% for floor, lights in windows.data.items %}
+        <tr>
+            {% for is_light_on in lights %}
+                <td class="{% if is_light_on %}light-on{% endif %}">
+                    {% if forloop.first %}{{ forloop.parentloop.counter }}{% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+<p>Количество комнат: {{ windows.data|length }}</p>
+<p>Номера комнат: {% for room in room_numbers %}{{ room }} {% endfor %}</p>
+{% endblock %}
