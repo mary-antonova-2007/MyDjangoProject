@@ -79,16 +79,31 @@ def rehearsal_rooms(request):
 def rehearsal_info(request, day, month, year):
     data = get_data_by_date(day, month, year, auth_token)
     if data:
-        room_numbers = parse_room_info(data)  # Вызываем функцию анализа данных
+        # Обработка данных для шаблона
+        floors_info = []  # Список словарей для каждого этажа
+        room_number = 1  # Начинаем нумерацию комнат с 1
+        for floor, windows in data['windows']['data'].items():
+            # Создаем список для хранения информации по комнатам этажа
+            rooms = []
+            windows_in_room = iter(data['windows_for_flat']['data'])
+            current_room_windows = next(windows_in_room)  # Количество окон в текущей комнате
+            for window in windows:
+                if current_room_windows == 0:  # Если окна текущей комнаты закончились
+                    room_number += 1  # Переходим к следующей комнате
+                    current_room_windows = next(windows_in_room, None)  # Количество окон в новой комнате
+                rooms.append({'room_number': room_number, 'light_on': window})
+                current_room_windows -= 1  # Уменьшаем количество оставшихся окон текущей комнаты
+
+            floors_info.append({'floor': floor, 'rooms': rooms})
+            room_number += 1  # Следующий этаж начинается с новой комнаты
+
         context = {
-            'date': data['date']['description'],  # Описание даты
-            'rooms_count': data['flats_count']['data'],  # Количество комнат на этаже
-            'windows_for_room': data['windows_for_flat']['data'],  # Количество окон в комнатах
-            'windows': data['windows']['data'],  # Данные о свете в окнах
-            'room_numbers': room_numbers  # Номера комнат с репетициями
+            'date': data['date']['description'],
+            'floors_info': floors_info,  # Добавленный контекст с информацией по этажам
+            'room_numbers': parse_room_info(data)  # Парсинг номеров комнат с включенным светом
         }
-        print(context)
-        return render(request, 'rehearsals/rehearsal_info.html', context)  # Отправляем данные в шаблон
+        return render(request, 'rehearsals/rehearsal_info.html', context)
     else:
         return JsonResponse({'error': 'Не удалось получить данные за указанную дату'}, status=500)
+
 

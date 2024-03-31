@@ -33,15 +33,15 @@
     <tr>
         <td colspan="6">Окна на этаже: {% for windows_count in windows_for_room %}{{ windows_count }} {% endfor %}</td>
     </tr>
-    {% for floor, lights in windows.items %}
+    {% for floor in floors_info %}
         <tr>
-            <th width="300px">Этаж {{ forloop.counter }}</th>
-            {% for is_light_on in lights %}
-                <td class="{% if is_light_on %}light-on{% endif %} cell"></td>
+            <td>Этаж {{ floor.floor|slice:"6:" }}</td>
+            {% for room in floor.rooms %}
+                <td class="{% if room.light_on %}light-on{% endif %}">{{ room.room_number }}</td>
             {% endfor %}
         </tr>
     {% endfor %}
 </table>
-<p>Количество этажей: {{ windows|length }}</p>
+<p>Количество этажей: {{ floors_info|length }}</p>
 <p>Номера комнат с включенным светом: {% for room in room_numbers %}{{ room }} {% endfor %}</p>
 {% endblock %}
