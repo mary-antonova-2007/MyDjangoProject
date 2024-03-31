@@ -10,41 +10,25 @@ auth_token = 'ppo_10_13903'
 
 
 def parse_room_info(data):
-    rooms_count = data['rooms_count']['data']
-    windows_per_room = data['windows_for_room']['data']
-    light_data = data['windows']['data']
+    windows_data = data['windows']['data']  # Данные о свете в окнах по этажам
+    windows_for_flat = data['windows_for_flat']['data']  # Количество окон в комнатах
+    room_numbers = []  # Список для хранения номеров комнат с включенным светом
 
-    # Список для сбора номеров комнат с включенным светом
-    room_numbers_with_light = []
+    current_room = 0  # Индекс текущей комнаты
+    for floor, lights in windows_data.items():  # Итерируем по каждому этажу
+        window_index = 0  # Счетчик индекса окна для текущей комнаты
+        while window_index < len(lights):  # Пока не пройдем все окна на этаже
+            if current_room < len(windows_for_flat):  # Проверяем, не вышли ли мы за пределы списка комнат
+                windows_count = windows_for_flat[current_room]  # Количество окон в текущей комнате
+                # Проверяем, горит ли свет хотя бы в одном окне текущей комнаты
+                if any(lights[window_index:window_index + windows_count]):
+                    room_numbers.append(current_room + 1)  # Добавляем номер комнаты (нумерация с 1)
+                window_index += windows_count  # Переходим к следующему набору окон (следующей комнате)
+                current_room += 1  # Увеличиваем счетчик комнат
+            else:
+                break  # Выходим из цикла, если все комнаты обработаны
 
-    # Начальный номер комнаты для каждого этажа
-    room_number = 1
-
-    # Пройдемся по каждому этажу
-    for floor in light_data:
-        # Получим список окон с включенным светом на этаже
-        windows_light_on = light_data[floor]
-
-        # Счетчик окон для определения номера комнаты
-        window_counter = 0
-
-        # Пройдемся по каждому окну на этаже
-        for window, is_light_on in enumerate(windows_light_on, start=1):
-            # Если свет включен, добавим комнату в список
-            if is_light_on:
-                # Номер комнаты = текущий номер комнаты + номер окна // окна в комнате
-                room_numbers_with_light.append(
-                    room_number + window_counter // windows_per_room[window_counter % rooms_count])
-
-            # Увеличиваем счетчик окон
-            window_counter += 1
-
-        # Пересчитываем номер комнаты для следующего этажа
-        room_number += rooms_count
-
-    # Убираем дубликаты номеров комнат и сортируем их
-    room_numbers_with_light = sorted(set(room_numbers_with_light))
-    return room_numbers_with_light
+    return room_numbers
 
 
 def available_dates(request):
@@ -93,18 +77,17 @@ def rehearsal_rooms(request):
 # View для отображения страницы с информацией
 def rehearsal_info(request, day, month, year):
     data = get_data_by_date(day, month, year, auth_token)
-    print('rehearsal_info data:', data)
     if data:
-        # Допустим, что функция parse_room_info извлекает номера комнат из данных API
-        room_numbers = parse_room_info(data)  # Вы должны написать эту функцию
+        room_numbers = parse_room_info(data)  # Вызываем функцию анализа данных
         context = {
-            'date': data['date'],
-            'rooms_count': data['rooms_count'],
-            'windows_for_room': data['windows_for_room'],
-            'windows': data['windows'],
-            'room_numbers': room_numbers
+            'date': data['date']['description'],  # Описание даты
+            'rooms_count': data['flats_count']['data'],  # Количество комнат на этаже
+            'windows_for_room': data['windows_for_flat']['data'],  # Количество окон в комнатах
+            'windows': data['windows']['data'],  # Данные о свете в окнах
+            'room_numbers': room_numbers  # Номера комнат с репетициями
         }
-        return render(request, 'rehearsals/rehearsal_info.html', context)
+        print(context)
+        return render(request, 'rehearsals/rehearsal_info.html', context)  # Отправляем данные в шаблон
     else:
         return JsonResponse({'error': 'Не удалось получить данные за указанную дату'}, status=500)
 

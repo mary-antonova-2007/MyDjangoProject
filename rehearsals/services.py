@@ -13,7 +13,7 @@ def get_available_dates(auth_token):
 
 
 def get_data_by_date(day, month, year, auth_token):
-    url = f'https://olimp.miet.ru/ppo_it_final/?day={day}&month={month}&year={year}'
+    url = f'https://olimp.miet.ru/ppo_it_final?day={day}&month={month}&year={year}'
 
     print(f'get_data_by_date url: {url}')
     headers = {'X-Auth-Token': auth_token}
