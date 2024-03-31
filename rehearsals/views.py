@@ -49,7 +49,6 @@ def data_by_date(request, day, month, year):
         return JsonResponse({'error': f'Не удалось получить данные за указанную дату. {error_message}'}, status=500)
 
 
-
 def rehearsal_rooms(request):
     if request.method == 'POST':
         # Получаем дату напрямую из данных формы
